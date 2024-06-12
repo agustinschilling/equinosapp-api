@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Caballo {
 
     public enum Sexo {
-        MACHO, HEMBRA
+        MASCULINO, FEMENINO
     }
 
     @Id

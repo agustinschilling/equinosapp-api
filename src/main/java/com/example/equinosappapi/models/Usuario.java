@@ -17,6 +17,7 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long idUsuario;
     private String username;
+    private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
