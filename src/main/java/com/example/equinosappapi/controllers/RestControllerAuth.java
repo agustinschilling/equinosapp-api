@@ -8,6 +8,7 @@ import com.example.equinosappapi.models.Usuario;
 import com.example.equinosappapi.repositories.IUsuariosRepository;
 import com.example.equinosappapi.security.JwtGenerador;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
+@Validated
 @RestController
 @RequestMapping("/api/auth/")
 public class RestControllerAuth {
@@ -42,7 +44,7 @@ public class RestControllerAuth {
     //Método para poder registrar usuarios con role "user"
     @Operation(summary = "registrar user")
     @PostMapping("register")
-    public ResponseEntity<String> registrar(@RequestBody DtoRegistro dtoRegistro) {
+    public ResponseEntity<String> registrar(@Valid @RequestBody DtoRegistro dtoRegistro) {
         ResponseEntity<String> BAD_REQUEST = checkExistencia(dtoRegistro);
         if (BAD_REQUEST != null) return BAD_REQUEST;
         crearUsuario(dtoRegistro, Role.USUARIO);
@@ -70,7 +72,7 @@ public class RestControllerAuth {
 
     //Método para poder guardar usuarios de tipo ADMIN
     @PostMapping("registerVet")
-    public ResponseEntity<String> registrarAdmin(@RequestBody DtoRegistro dtoRegistro) {
+    public ResponseEntity<String> registrarAdmin(@Valid @RequestBody DtoRegistro dtoRegistro) {
         ResponseEntity<String> BAD_REQUEST = checkExistencia(dtoRegistro);
         if (BAD_REQUEST != null) return BAD_REQUEST;
         crearUsuario(dtoRegistro, Role.VETERINARIO);
@@ -79,7 +81,7 @@ public class RestControllerAuth {
 
     //Método para poder logear un usuario, ya sea por username o email y obtener un token
     @PostMapping("login")
-    public ResponseEntity<?> login(@RequestBody DtoLogin dtoLogin) {
+    public ResponseEntity<?> login(@Valid @RequestBody DtoLogin dtoLogin) {
         try {
             String username = getUsernameFromIdentifier(dtoLogin.getIdentificacion());
             Authentication authentication = authenticateUser(username, dtoLogin.getPassword());
