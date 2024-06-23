@@ -4,14 +4,16 @@ import com.example.equinosappapi.models.Caballo;
 import com.example.equinosappapi.services.CaballoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/caballos")
 public class RestControllerCaballos {
 
-    private CaballoService caballoService;
+    private final CaballoService caballoService;
 
     @Autowired
     public RestControllerCaballos(CaballoService caballoService) {
@@ -19,7 +21,8 @@ public class RestControllerCaballos {
     }
 
     @PostMapping
-    public void uploadCaballo(@RequestBody Caballo caballo) {
+    public void cargarCaballo(@RequestPart("caballo") Caballo caballo, @RequestPart("imagen") MultipartFile imagen) throws IOException {
+        caballo.setImagen(imagen.getBytes());
         caballoService.add(caballo);
     }
 

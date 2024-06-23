@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Caballo {
 
     public enum Sexo {
-        MASCULINO, FEMENINO
+        Masculino, Femenino
     }
 
     @Id
@@ -21,10 +21,13 @@ public class Caballo {
     @Column(name = "id_caballo")
     private Long id;
     private String nombre;
+    @Enumerated(EnumType.STRING)  // Esta anotación indica que se guardará como STRING en la BD
     private Sexo sexo;
     private String fechaNacimiento;
     private boolean entrenamiento;
     private boolean estabulacion;
     private boolean salidaAPiquete;
     private boolean dolor;
+    @Lob
+    private byte[] imagen;
 }
