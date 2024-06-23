@@ -30,4 +30,5 @@ public class Caballo {
     private boolean dolor;
     @Lob
     private byte[] imagen;
+    private String observaciones;
 }
