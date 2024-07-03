@@ -23,12 +23,15 @@ public class Caballo {
     private String nombre;
     @Enumerated(EnumType.STRING)  // Esta anotación indica que se guardará como STRING en la BD
     private Sexo sexo;
-    private String fechaNacimiento;
+    private String fechaNacimiento; // DD-MM-AAAA
     private boolean entrenamiento;
     private boolean estabulacion;
     private boolean salidaAPiquete;
     private boolean dolor;
     @Lob
     private byte[] imagen;
+    @Lob
+    @Column(name = "imagen_comprimida")
+    private byte[] imagenComprimida;
     private String observaciones;
 }
