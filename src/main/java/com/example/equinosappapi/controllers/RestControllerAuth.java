@@ -7,6 +7,7 @@ import com.example.equinosappapi.models.Role;
 import com.example.equinosappapi.models.Usuario;
 import com.example.equinosappapi.repositories.IUsuariosRepository;
 import com.example.equinosappapi.security.JwtGenerador;
+import com.example.equinosappapi.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,15 @@ public class RestControllerAuth {
     private final PasswordEncoder passwordEncoder;
     private final IUsuariosRepository usuariosRepository;
     private final JwtGenerador jwtGenerador;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public RestControllerAuth(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, IUsuariosRepository usuariosRepository, JwtGenerador jwtGenerador) {
+    public RestControllerAuth(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, IUsuariosRepository usuariosRepository, JwtGenerador jwtGenerador, UsuarioService usuarioService) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.usuariosRepository = usuariosRepository;
         this.jwtGenerador = jwtGenerador;
+        this.usuarioService = usuarioService;
     }
     //Método para poder registrar usuarios con role "user"
     @Operation(summary = "registrar user")

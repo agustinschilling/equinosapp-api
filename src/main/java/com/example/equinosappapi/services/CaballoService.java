@@ -41,6 +41,10 @@ public class CaballoService {
         caballoRepository.deleteById(id);
     }
 
+    public Caballo getById(Long id) {
+        return caballoRepository.getReferenceById(id);
+    }
+
     private DtoCaballoImagenComprimida convertToDtoCaballoImagenComprimida(Caballo caballo) {
         return new DtoCaballoImagenComprimida(
                 caballo.getId(),

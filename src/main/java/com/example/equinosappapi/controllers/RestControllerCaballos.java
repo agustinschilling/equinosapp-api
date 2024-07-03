@@ -58,4 +58,9 @@ public class RestControllerCaballos {
     public List<DtoCaballoImagenComprimida> readAll() {
         return caballoService.readAll();
     }
+
+    @GetMapping("/{id}")
+    public Caballo getCaballoById(@PathVariable Long id) {
+        return caballoService.getById(id);
+    }
 }

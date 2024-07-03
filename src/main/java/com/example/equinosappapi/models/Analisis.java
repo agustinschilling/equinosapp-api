@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "analisis")
 public class Analisis {
 
-    enum Prediccion {
-        INTERESADO, SERENO, DISGUSTADO;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_analisis")
@@ -29,7 +25,8 @@ public class Analisis {
     @JoinColumn(name = "id_caballo", referencedColumnName = "id_caballo")
     private Caballo caballo;
 
-    private String imagen; // ????
+    @Lob
+    private byte[] imagen;
 
     @Enumerated(EnumType.STRING)
     private Prediccion prediccion;

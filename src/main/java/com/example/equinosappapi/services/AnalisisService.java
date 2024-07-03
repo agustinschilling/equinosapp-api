@@ -36,4 +36,8 @@ public class AnalisisService {
     public void delete(Long id) {
         analisisRepository.deleteById(id);
     }
+
+    public Analisis getById(Long id) {
+        return analisisRepository.getReferenceById(id);
+    }
 }
