@@ -87,9 +87,19 @@ public class RestControllerAuth {
     public ResponseEntity<?> login(@Valid @RequestBody DtoLogin dtoLogin) {
         try {
             String username = getUsernameFromIdentifier(dtoLogin.getIdentificacion());
+
+            Usuario usuario = usuarioService.getByUsername(username);
+
             Authentication authentication = authenticateUser(username, dtoLogin.getPassword());
             String token = generateToken(authentication);
-            return ResponseEntity.ok(new DtoAuthResponse(token));
+            DtoAuthResponse authResponse = new DtoAuthResponse();
+            authResponse.setAccessToken(token);
+            authResponse.setUsername(username);
+            authResponse.setEmail(usuario.getEmail());
+            authResponse.setRole(usuario.getRole());
+            authResponse.setIdUsuario(usuario.getIdUsuario());
+
+            return ResponseEntity.ok(authResponse);
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body("Email no registrado");
         } catch (AuthenticationException e) {

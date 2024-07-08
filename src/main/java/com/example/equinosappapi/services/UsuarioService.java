@@ -36,4 +36,8 @@ public class UsuarioService {
     public Usuario getById(Long id) {
         return usuariosRepository.getReferenceById(id);
     }
+
+    public Usuario getByUsername(String username) {
+        return usuariosRepository.getByUsername(username);
+    }
 }

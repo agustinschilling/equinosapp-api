@@ -2,6 +2,8 @@ package com.example.equinosappapi.controllers;
 
 import com.example.equinosappapi.dtos.DtoAnalisis;
 import com.example.equinosappapi.models.Analisis;
+import com.example.equinosappapi.models.PrediccionDetalle;
+import com.example.equinosappapi.models.PrediccionEnum;
 import com.example.equinosappapi.services.AnalisisService;
 import com.example.equinosappapi.services.CaballoService;
 import com.example.equinosappapi.services.UsuarioService;
@@ -27,12 +29,20 @@ public class RestControllerAnalisis {
     }
 
     @PostMapping
-    public void uploadAnalisis(@RequestBody DtoAnalisis analisis, @RequestPart("imagen") MultipartFile imagen) throws IOException {
+    public void uploadAnalisis(@RequestPart("analisis") DtoAnalisis analisis, @RequestPart("imagen") MultipartFile imagen) throws IOException {
         Analisis newAnalisis = new Analisis();
         newAnalisis.setCaballo(caballoService.getById(analisis.getIdCaballo()));
         newAnalisis.setUsuario(usuarioService.getById(analisis.getIdUsuario()));
         newAnalisis.setImagen(imagen.getBytes());
-        newAnalisis.setPrediccion(analisis.getPrediccion());
+
+        PrediccionDetalle prediccionDetalle = new PrediccionDetalle();
+        prediccionDetalle.setDisgustado(analisis.getDisgustado());
+        prediccionDetalle.setSereno(analisis.getSereno());
+        prediccionDetalle.setInteresado(analisis.getInteresado());
+
+        prediccionDetalle.setPrediccion(PrediccionEnum.fromString(analisis.getPrediccion()));
+
+        newAnalisis.setPrediccionDetalle(prediccionDetalle);
 
         analisisService.add(newAnalisis);
     }

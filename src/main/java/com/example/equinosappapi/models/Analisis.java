@@ -28,7 +28,7 @@ public class Analisis {
     @Lob
     private byte[] imagen;
 
-    @Enumerated(EnumType.STRING)
-    private Prediccion prediccion;
-
+    @Embedded
+    @Column(name = "prediccion_detalle")
+    private PrediccionDetalle prediccionDetalle;
 }
