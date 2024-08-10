@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class DtoRegistro { // Data transfer object
+public class RegistryDto {
     @NotBlank(message = "Nombre de usuario no puede estar en blanco")
     @NotNull(message = "Nombre de usuario no puede ser nulo")
     private String username;

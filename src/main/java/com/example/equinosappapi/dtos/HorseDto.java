@@ -7,15 +7,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoCaballo {
+public class HorseDto {
     private Long id;
-    private String nombre;
-    private String sexo;
-    private String fechaNacimiento;
+    private String name;
+    private String gender;
+    private String dateOfBirth;
     private boolean entrenamiento;
     private boolean estabulacion;
     private boolean salidaAPiquete;
     private boolean dolor;
-    private byte[] imagen;
-    private String observaciones;
+    private byte[] image;
+    private String observations;
 }

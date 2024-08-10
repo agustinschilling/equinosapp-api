@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoAnalisis {
-    private Long idUsuario;
-    private Long idCaballo;
+public class AnalysisDto {
+    private Long userId;
+    private Long horseId;
     private double interesado;
     private double sereno;
     private double disgustado;
-    private byte[] imagen;
-    private String prediccion;
+    private byte[] image;
+    private String prediction;
+    private String observations;
 }

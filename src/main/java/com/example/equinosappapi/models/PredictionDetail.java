@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class PrediccionDetalle {
+public class PredictionDetail {
     private double interesado;
     private double sereno;
     private double disgustado;
 
     @Enumerated(EnumType.STRING)
-    private PrediccionEnum prediccion;
+    private PredictionEnum prediction;
 }
