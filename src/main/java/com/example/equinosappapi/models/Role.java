@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Role {
-    USUARIO, VETERINARIO;
+    USER, ADVANCED_USER;
 
     public List<Role> getRoles() {
         List<Role> roles = new ArrayList<>();
-        roles.add(Role.USUARIO);
-        roles.add(Role.VETERINARIO);
+        roles.add(Role.USER);
+        roles.add(Role.ADVANCED_USER);
         return roles;
     }
 }

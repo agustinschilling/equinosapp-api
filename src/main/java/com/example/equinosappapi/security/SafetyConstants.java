@@ -1,7 +1,6 @@
 package com.example.equinosappapi.security;
 
-public class ConstantesSeguridad {
+public class SafetyConstants {
     public static final long JWT_EXPIRATION_TOKEN = 300000; // 5 min
-    public static final String JWT_FIRMA = "equinoapp"; // firma para encriptar
-
+    public static final String JWT_SIGNATURE = "equinoapp";
 }

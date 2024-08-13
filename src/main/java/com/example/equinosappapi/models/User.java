@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "usuario")
-public class Usuario {
+@Table(name = "user_table")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
-    private Long idUsuario;
+    @Column(name = "user_id")
+    private Long userId;
     private String username;
     private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USUARIO; // Por default es usuario
+    private Role role = Role.USER;
 }

@@ -9,14 +9,14 @@ import java.io.IOException;
 
 public class ImageCompressor {
 
-    public byte[] comprimirImagen(byte[] bytes) throws IOException {
+    public byte[] compressImage(byte[] bytes) throws IOException {
         long originalSize = bytes.length;
         System.out.println("Original size = " + originalSize);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         BufferedImage originalImage = ImageIO.read(inputStream);
 
-        int targetWidth = 100;  // Ancho objetivo
-        int targetHeight = (int) (originalImage.getHeight() * (100.0 / originalImage.getWidth())); // Mantener la relación de aspecto
+        int targetWidth = 100;  // Width
+        int targetHeight = (int) (originalImage.getHeight() * (100.0 / originalImage.getWidth())); // Maintain aspect ratio
 
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
@@ -26,10 +26,9 @@ public class ImageCompressor {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(outputImage, "jpeg", outputStream);
-        byte[] compressedImage = outputStream.toByteArray();
-        long compressedSize = compressedImage.length;
-        System.out.println("Compressed size = " + compressedSize);
+//        byte[] compressedImage = outputStream.toByteArray();
+//        long compressedSize = compressedImage.length;
+//        System.out.println("Compressed size = " + compressedSize);
         return outputStream.toByteArray();
     }
-
 }
