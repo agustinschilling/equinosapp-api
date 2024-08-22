@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -98,5 +99,15 @@ public class AnalysisController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @Operation(summary = "Obtener todos los análisis")
+    @GetMapping
+    public ResponseEntity<List<Analysis>> getAllAnalysis() {
+        List<Analysis> analyses = analysisService.getAll();
+        if (analyses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(analyses);
     }
 }

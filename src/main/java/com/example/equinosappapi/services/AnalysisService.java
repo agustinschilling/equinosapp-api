@@ -40,4 +40,8 @@ public class AnalysisService {
     public Analysis getById(Long id) {
         return analysisRepository.getReferenceById(id);
     }
+
+    public List<Analysis> getAll() {
+        return analysisRepository.findAll();
+    }
 }
