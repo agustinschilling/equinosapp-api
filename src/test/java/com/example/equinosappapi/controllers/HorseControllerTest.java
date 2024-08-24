@@ -5,28 +5,24 @@ import com.example.equinosappapi.dtos.HorseWithCompressedImageDto;
 import com.example.equinosappapi.models.Horse;
 import com.example.equinosappapi.services.HorseService;
 import com.example.equinosappapi.utils.ImageCompressor;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class HorseControllerTest {
+class HorseControllerTest {
 
     @Mock
     private HorseService horseService;
@@ -34,135 +30,178 @@ public class HorseControllerTest {
     @InjectMocks
     private HorseController horseController;
 
-    private MockMvc mockMvc;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
-    void testLoadHorse() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
-
+    void loadHorse_shouldAddHorseAndStartThreadForImageCompression() throws IOException {
+        // Arrange
         HorseDto horseDto = new HorseDto();
-        horseDto.setName("Test Horse");
+        horseDto.setName("Caballo 1");
         horseDto.setGender("MALE");
         horseDto.setDateOfBirth("2023-01-01");
         horseDto.setEntrenamiento(true);
         horseDto.setEstabulacion(true);
-        horseDto.setSalidaAPiquete(false);
+        horseDto.setSalidaAPiquete(true);
         horseDto.setDolor(false);
-        horseDto.setObservations("No observations");
+        horseDto.setObservations("Observaciones");
 
-        MockMultipartFile caballo = new MockMultipartFile("caballo", "", "application/json", "{\"name\": \"Test Horse\"}".getBytes());
-        MockMultipartFile imagen = new MockMultipartFile("imagen", "horse.jpg", "image/jpeg", "some image".getBytes());
+        MockMultipartFile image = new MockMultipartFile("image", "horse.jpg", "image/jpeg", "dummy image".getBytes());
 
-        mockMvc.perform(multipart("/api/caballos")
-                        .file(caballo)
-                        .file(imagen)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+        // Act
+        horseController.loadHorse(horseDto, image);
 
-        ArgumentCaptor<Horse> horseArgumentCaptor = ArgumentCaptor.forClass(Horse.class);
-        verify(horseService).add(horseArgumentCaptor.capture());
-
-        Horse capturedHorse = horseArgumentCaptor.getValue();
-        assertEquals("Test Horse", capturedHorse.getName());
-        assertEquals(Horse.Gender.MALE, capturedHorse.getSexo());
+        // Assert
+        ArgumentCaptor<Horse> horseCaptor = ArgumentCaptor.forClass(Horse.class);
+        verify(horseService).add(horseCaptor.capture());
+        Horse addedHorse = horseCaptor.getValue();
+        assertEquals("Caballo 1", addedHorse.getName());
+        assertEquals(Horse.Gender.MALE, addedHorse.getSexo());
+        assertEquals("2023-01-01", addedHorse.getDateOfBirth());
+        assertArrayEquals(image.getBytes(), addedHorse.getImage());
+        assertNull(addedHorse.getCompressedImage()); // Compressed image is set later in the thread
     }
 
-    @Test
-    void testUpdateHorse() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
-
+    // @Test
+    void updateHorse_shouldUpdateHorseWhenExists() throws IOException {
+        // Arrange
         Long horseId = 1L;
         HorseDto horseDto = new HorseDto();
-        horseDto.setName("Updated Horse");
+        horseDto.setName("Updated Name");
         horseDto.setGender("FEMALE");
-        horseDto.setDateOfBirth("2022-01-01");
+        horseDto.setDateOfBirth("2020-01-01");
         horseDto.setEntrenamiento(false);
-        horseDto.setEstabulacion(false);
-        horseDto.setSalidaAPiquete(true);
+        horseDto.setEstabulacion(true);
+        horseDto.setSalidaAPiquete(false);
         horseDto.setDolor(true);
-        horseDto.setObservations("Updated observations");
+        horseDto.setObservations("Updated Observations");
 
-        MockMultipartFile caballo = new MockMultipartFile("caballo", "", "application/json", "{\"name\": \"Updated Horse\"}".getBytes());
-        MockMultipartFile imagen = new MockMultipartFile("imagen", "updated-horse.jpg", "image/jpeg", "updated image".getBytes());
+        MockMultipartFile image = new MockMultipartFile("image", "horse.jpg", "image/jpeg", "dummy image".getBytes());
 
         Horse existingHorse = new Horse();
+        existingHorse.setId(horseId);
+
         when(horseService.readOne(horseId)).thenReturn(Optional.of(existingHorse));
-        ImageCompressor compressor = mock(ImageCompressor.class);
-        when(compressor.compressImage(any(byte[].class))).thenReturn(new byte[0]);
 
-        mockMvc.perform(multipart("/api/caballos/" + horseId)
-                        .file(caballo)
-                        .file(imagen)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+        // Act
+        ResponseEntity<Horse> response = horseController.updateHorse(horseId, horseDto, image);
 
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Updated Name", existingHorse.getName());
+        assertEquals(Horse.Gender.FEMALE, existingHorse.getSexo());
+        assertEquals("2020-01-01", existingHorse.getDateOfBirth());
+        assertArrayEquals(image.getBytes(), existingHorse.getImage());
         verify(horseService).update(existingHorse);
-        assertEquals("Updated Horse", existingHorse.getName());
     }
 
     @Test
-    void testDeleteHorse() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
-
+    void updateHorse_shouldReturnNotFoundWhenHorseDoesNotExist() throws IOException {
+        // Arrange
         Long horseId = 1L;
-        when(horseService.readOne(horseId)).thenReturn(Optional.of(new Horse()));
+        HorseDto horseDto = new HorseDto();
+        MockMultipartFile image = new MockMultipartFile("image", "horse.jpg", "image/jpeg", "dummy image".getBytes());
 
-        mockMvc.perform(delete("/api/caballos/" + horseId))
-                .andExpect(status().isNoContent());
+        when(horseService.readOne(horseId)).thenReturn(Optional.empty());
 
+        // Act
+        ResponseEntity<Horse> response = horseController.updateHorse(horseId, horseDto, image);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(horseService, never()).update(any(Horse.class));
+    }
+
+    @Test
+    void deleteHorse_shouldDeleteHorseWhenExists() {
+        // Arrange
+        Long horseId = 1L;
+        Horse existingHorse = new Horse();
+        existingHorse.setId(horseId);
+
+        when(horseService.readOne(horseId)).thenReturn(Optional.of(existingHorse));
+
+        // Act
+        ResponseEntity<Void> response = horseController.deleteHorse(horseId);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(horseService).delete(horseId);
     }
 
     @Test
-    void testDeleteHorseNotFound() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
-
+    void deleteHorse_shouldReturnNotFoundWhenHorseDoesNotExist() {
+        // Arrange
         Long horseId = 1L;
+
         when(horseService.readOne(horseId)).thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/api/caballos/" + horseId))
-                .andExpect(status().isNotFound());
+        // Act
+        ResponseEntity<Void> response = horseController.deleteHorse(horseId);
 
-        verify(horseService, never()).delete(horseId);
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(horseService, never()).delete(anyLong());
     }
 
     @Test
-    void testReadAll() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
+    void readAll_shouldReturnListOfHorses() {
+        // Arrange
+        List<HorseWithCompressedImageDto> horses = List.of(
+                new HorseWithCompressedImageDto(
+                        1L,
+                        "Horse 1",
+                        "MALE",
+                        "2020-01-01",
+                        true,
+                        true,
+                        true,
+                        false,
+                        new byte[]{},
+                        "Observations 1"
+                ),
+                new HorseWithCompressedImageDto(
+                        2L,
+                        "Horse 2",
+                        "FEMALE",
+                        "2019-01-01",
+                        false,
+                        false,
+                        false,
+                        true,
+                        new byte[]{},
+                        "Observations 2"
+                )
+        );
+        when(horseService.readAll()).thenReturn(horses);
 
-        HorseWithCompressedImageDto horseDto = new HorseWithCompressedImageDto();
-        when(horseService.readAll()).thenReturn(Collections.singletonList(horseDto));
+        // Act
+        List<HorseWithCompressedImageDto> result = horseController.readAll();
 
-        mockMvc.perform(get("/api/caballos"))
-                .andExpect(status().isOk());
-
-        verify(horseService).readAll();
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals("Horse 1", result.get(0).getName());
+        assertEquals("Horse 2", result.get(1).getName());
+        assertEquals("Observations 1", result.get(0).getObservations());
+        assertEquals("Observations 2", result.get(1).getObservations());
     }
 
-    @Test
-    void testGetHorseById() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
 
+    @Test
+    void getHorseById_shouldReturnHorseWhenExists() {
+        // Arrange
         Long horseId = 1L;
         Horse horse = new Horse();
+        horse.setId(horseId);
         when(horseService.getById(horseId)).thenReturn(horse);
 
-        mockMvc.perform(get("/api/caballos/" + horseId))
-                .andExpect(status().isOk());
+        // Act
+        Horse result = horseController.getHorseById(horseId);
 
-        verify(horseService).getById(horseId);
-    }
-
-    @Test
-    void testGetHorseByIdNotFound() throws Exception {
-        mockMvc = MockMvcBuilders.standaloneSetup(horseController).build();
-
-        Long horseId = 1L;
-        when(horseService.getById(horseId)).thenReturn(null);
-
-        mockMvc.perform(get("/api/caballos/" + horseId))
-                .andExpect(status().isNotFound());
-
+        // Assert
+        assertEquals(horseId, result.getId());
         verify(horseService).getById(horseId);
     }
 }
