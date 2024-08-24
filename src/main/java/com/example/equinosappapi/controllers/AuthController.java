@@ -8,6 +8,8 @@ import com.example.equinosappapi.models.User;
 import com.example.equinosappapi.repositories.IUserRepository;
 import com.example.equinosappapi.security.JwtGenerator;
 import com.example.equinosappapi.services.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,40 +23,48 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.example.equinosappapi.security.JwtGenerator.getUsernameFromJwt;
-
 
 @Validated
 @RestController
 @RequestMapping("/api/auth/")
 public class AuthController {
+
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final IUserRepository userRepository;
     private final JwtGenerator jwtGenerator;
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, IUserRepository userRepository, JwtGenerator jwtGenerator, UserService userService) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          PasswordEncoder passwordEncoder,
+                          IUserRepository userRepository,
+                          JwtGenerator jwtGenerator,
+                          UserService userService,
+                          ObjectMapper objectMapper) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.jwtGenerator = jwtGenerator;
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
     @Operation(summary = "Registrar usuario")
     @PostMapping("register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegistryDto registryDto) {
-        ResponseEntity<String> BAD_REQUEST = checkExistencia(registryDto);
+    public ResponseEntity<ObjectNode> register(@Valid @RequestBody RegistryDto registryDto) {
+        ResponseEntity<ObjectNode> BAD_REQUEST = checkExistencia(registryDto);
         if (BAD_REQUEST != null) return BAD_REQUEST;
+
         createUser(registryDto, Role.USER);
-        return new ResponseEntity<>("Registro de usuario exitoso", HttpStatus.OK);
+
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", "Registro de usuario exitoso");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private void createUser(RegistryDto registryDto, Role role) {
@@ -66,23 +76,30 @@ public class AuthController {
         userRepository.save(user);
     }
 
-    private ResponseEntity<String> checkExistencia(RegistryDto registryDto) {
+    private ResponseEntity<ObjectNode> checkExistencia(RegistryDto registryDto) {
+        ObjectNode response = objectMapper.createObjectNode();
         if (userRepository.existsByUsername(registryDto.getUsername())) {
-            return new ResponseEntity<>("El usuario ya existe, intenta con otro", HttpStatus.BAD_REQUEST);
+            response.put("message", "El usuario ya existe, intenta con otro");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if (userRepository.existsByEmail(registryDto.getEmail())) {
-            return new ResponseEntity<>("El email ya existe, intenta con otro", HttpStatus.BAD_REQUEST);
+            response.put("message", "El email ya existe, intenta con otro");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         return null;
     }
 
     @Operation(summary = "Registrar usuario avanzado")
     @PostMapping("registerAdvanced")
-    public ResponseEntity<String> registrarAdvancedUser(@Valid @RequestBody RegistryDto registryDto) {
-        ResponseEntity<String> BAD_REQUEST = checkExistencia(registryDto);
+    public ResponseEntity<ObjectNode> registrarAdvancedUser(@Valid @RequestBody RegistryDto registryDto) {
+        ResponseEntity<ObjectNode> BAD_REQUEST = checkExistencia(registryDto);
         if (BAD_REQUEST != null) return BAD_REQUEST;
+
         createUser(registryDto, Role.ADVANCED_USER);
-        return new ResponseEntity<>("Registro de admin exitoso", HttpStatus.OK);
+
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", "Registro de usuario avanzado exitoso");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Iniciar sesion")
@@ -95,6 +112,7 @@ public class AuthController {
 
             Authentication authentication = authenticateUser(username, loginDto.getPassword());
             String token = generateToken(authentication);
+
             AuthResponseDto authResponse = new AuthResponseDto();
             authResponse.setAccessToken(token);
             authResponse.setUsername(username);
@@ -114,7 +132,7 @@ public class AuthController {
     @PostMapping("logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String token = extractTokenFromRequest(request);
-        // TODO
+        // TODO: Implementar la lógica de cierre de sesión
         return new ResponseEntity<>("Sesión cerrada con éxito", HttpStatus.OK);
     }
 
@@ -163,8 +181,7 @@ public class AuthController {
     }
 
     private Authentication authenticateUser(String username, String password) {
-        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                username, password));
+        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     private String generateToken(Authentication authentication) {
