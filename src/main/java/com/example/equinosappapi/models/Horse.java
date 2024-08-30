@@ -19,16 +19,11 @@ public class Horse {
             if (value == null) {
                 throw new IllegalArgumentException("El valor no puede ser nulo");
             }
-            switch (value.toLowerCase()) {
-                case "male":
-                case "masculino":
-                    return MALE;
-                case "female":
-                case "femenino":
-                    return FEMALE;
-                default:
-                    throw new IllegalArgumentException("Valor no válido: " + value);
-            }
+            return switch (value.toLowerCase()) {
+                case "male", "masculino" -> MALE;
+                case "female", "femenino" -> FEMALE;
+                default -> throw new IllegalArgumentException("Valor no válido: " + value);
+            };
         }
     }
 

@@ -32,16 +32,9 @@ public class HorseController {
     @PostMapping
     public void loadHorse(@RequestPart("horse") HorseDto horse, @RequestPart("image") MultipartFile image) throws IOException {
         Horse newHorse = new Horse();
-        newHorse.setName(horse.getName());
-        newHorse.setSexo(Horse.Gender.fromString(horse.getGender()));
-        newHorse.setDateOfBirth(horse.getDateOfBirth());
-        newHorse.setEntrenamiento(horse.isEntrenamiento());
-        newHorse.setEstabulacion(horse.isEstabulacion());
-        newHorse.setSalidaAPiquete(horse.isSalidaAPiquete());
-        newHorse.setDolor(horse.isDolor());
+        setHorseData(horse, newHorse);
         byte[] bytes = image.getBytes();
         newHorse.setImage(bytes);
-        newHorse.setObservations(horse.getObservations());
 
         horseService.add(newHorse);
 
@@ -66,28 +59,36 @@ public class HorseController {
         Optional<Horse> optionalHorse = horseService.readOne(id);
         if (optionalHorse.isPresent()) {
             Horse horse = optionalHorse.get();
-            horse.setName(horseDetails.getName());
-            horse.setSexo(Horse.Gender.valueOf(horseDetails.getGender()));
-            horse.setDateOfBirth(horseDetails.getDateOfBirth());
-            horse.setEntrenamiento(horseDetails.isEntrenamiento());
-            horse.setEstabulacion(horseDetails.isEstabulacion());
-            horse.setSalidaAPiquete(horseDetails.isSalidaAPiquete());
-            horse.setDolor(horseDetails.isDolor());
-            horse.setObservations(horseDetails.getObservations());
-            if (image != null && !image.isEmpty()) {
-                byte[] bytes = image.getBytes();
-                horse.setImage(bytes);
+            setHorseData(horseDetails, horse);
+            byte[] bytes;
 
-                ImageCompressor compressor = new ImageCompressor();
-                byte[] compressImage = compressor.compressImage(bytes);
-                horse.setCompressedImage(compressImage);
+            if (image != null && !image.isEmpty()) {
+                bytes = image.getBytes();
+            } else {
+                bytes = optionalHorse.get().getImage();
             }
+
+            horse.setImage(bytes);
+            ImageCompressor compressor = new ImageCompressor();
+            byte[] compressImage = compressor.compressImage(bytes);
+            horse.setCompressedImage(compressImage);
 
             horseService.update(horse);
             return ResponseEntity.ok(horse);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    private void setHorseData(@RequestPart("horse") HorseDto horseDetails, Horse horse) {
+        horse.setName(horseDetails.getName());
+        horse.setSexo(Horse.Gender.fromString(horseDetails.getGender()));
+        horse.setDateOfBirth(horseDetails.getDateOfBirth());
+        horse.setEntrenamiento(horseDetails.isEntrenamiento());
+        horse.setEstabulacion(horseDetails.isEstabulacion());
+        horse.setSalidaAPiquete(horseDetails.isSalidaAPiquete());
+        horse.setDolor(horseDetails.isDolor());
+        horse.setObservations(horseDetails.getObservations());
     }
 
     @Operation(summary = "Eliminar caballo")

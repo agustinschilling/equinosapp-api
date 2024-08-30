@@ -34,7 +34,7 @@ public class AnalysisController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Modificar analisis")
+    @Operation(summary = "Subir analisis")
     @PostMapping
     public void uploadAnalysis(@RequestPart("analysis") AnalysisDto analysis, @RequestPart("image") MultipartFile image) throws IOException {
         Analysis newAnalysis = new Analysis();
