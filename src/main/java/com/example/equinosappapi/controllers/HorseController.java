@@ -53,7 +53,6 @@ public class HorseController {
     }
 
     @Operation(summary = "Modificar caballo")
-    @PreAuthorize("hasRole('ADVANCED_USER')")
     @PutMapping("/{id}")
     public ResponseEntity<Horse> updateHorse(@PathVariable Long id, @RequestPart("horse") HorseDto horseDetails, @RequestPart("image") MultipartFile image) throws IOException {
         Optional<Horse> optionalHorse = horseService.readOne(id);
@@ -103,9 +102,10 @@ public class HorseController {
         return horseService.readAll();
     }
 
-    @Operation(summary = "Obtener caballo por identificacion")
+    @Operation(summary = "Obtener caballo por identificación")
     @GetMapping("/{id}")
-    public Horse getHorseById(@PathVariable Long id) {
-        return horseService.getById(id);
+    public ResponseEntity<Horse> getHorseById(@PathVariable Long id) {
+        Optional<Horse> horse = horseService.readOne(id);
+        return horse.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }

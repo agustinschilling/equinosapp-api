@@ -198,7 +198,7 @@ class HorseControllerTest {
         when(horseService.getById(horseId)).thenReturn(horse);
 
         // Act
-        Horse result = horseController.getHorseById(horseId);
+        Horse result = horseController.getHorseById(horseId).getBody();
 
         // Assert
         assertEquals(horseId, result.getId());
