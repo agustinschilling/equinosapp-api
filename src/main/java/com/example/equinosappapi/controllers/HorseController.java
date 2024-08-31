@@ -60,19 +60,13 @@ public class HorseController {
         if (optionalHorse.isPresent()) {
             Horse horse = optionalHorse.get();
             setHorseData(horseDetails, horse);
-            byte[] bytes;
-
             if (image != null && !image.isEmpty()) {
-                bytes = image.getBytes();
-            } else {
-                bytes = optionalHorse.get().getImage();
+                byte[] bytes = image.getBytes();
+                horse.setImage(bytes);
+                ImageCompressor compressor = new ImageCompressor();
+                byte[] compressImage = compressor.compressImage(bytes);
+                horse.setCompressedImage(compressImage);
             }
-
-            horse.setImage(bytes);
-            ImageCompressor compressor = new ImageCompressor();
-            byte[] compressImage = compressor.compressImage(bytes);
-            horse.setCompressedImage(compressImage);
-
             horseService.update(horse);
             return ResponseEntity.ok(horse);
         } else {

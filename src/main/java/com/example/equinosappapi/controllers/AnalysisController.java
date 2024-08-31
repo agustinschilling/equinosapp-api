@@ -38,10 +38,14 @@ public class AnalysisController {
     @PostMapping
     public void uploadAnalysis(@RequestPart("analysis") AnalysisDto analysis, @RequestPart("image") MultipartFile image) throws IOException {
         Analysis newAnalysis = new Analysis();
+        setAnalysisData(analysis, newAnalysis);
+        newAnalysis.setImage(image.getBytes());
+        analysisService.add(newAnalysis);
+    }
+
+    private void setAnalysisData(@RequestPart("analysis") AnalysisDto analysis, Analysis newAnalysis) {
         newAnalysis.setHorse(horseService.getById(analysis.getHorseId()));
         newAnalysis.setUser(userService.getById(analysis.getUserId()));
-        newAnalysis.setImage(image.getBytes());
-
         PredictionDetail predictionDetail = new PredictionDetail();
         predictionDetail.setDisgustado(analysis.getDisgustado());
         predictionDetail.setSereno(analysis.getSereno());
@@ -49,8 +53,6 @@ public class AnalysisController {
         predictionDetail.setPrediction(PredictionEnum.fromString(analysis.getPrediction()));
         newAnalysis.setPredictionDetail(predictionDetail);
         newAnalysis.setObservations(analysis.getObservations());
-
-        analysisService.add(newAnalysis);
     }
 
     @Operation(summary = "Obtener analisis")
@@ -66,21 +68,11 @@ public class AnalysisController {
         Optional<Analysis> optionalAnalysis = analysisService.readOne(id);
         if (optionalAnalysis.isPresent()) {
             Analysis analysis = optionalAnalysis.get();
-            analysis.setHorse(horseService.getById(analysisDetails.getHorseId()));
-            analysis.setUser(userService.getById(analysisDetails.getUserId()));
+            setAnalysisData(analysisDetails, analysis);
 
             if (image != null && !image.isEmpty()) {
                 analysis.setImage(image.getBytes());
             }
-
-            PredictionDetail predictionDetail = new PredictionDetail();
-            predictionDetail.setDisgustado(analysisDetails.getDisgustado());
-            predictionDetail.setSereno(analysisDetails.getSereno());
-            predictionDetail.setInteresado(analysisDetails.getInteresado());
-            predictionDetail.setPrediction(PredictionEnum.fromString(analysisDetails.getPrediction()));
-            analysis.setPredictionDetail(predictionDetail);
-
-            analysis.setObservations(analysisDetails.getObservations());
 
             analysisService.update(analysis);
             return ResponseEntity.ok(analysis);
