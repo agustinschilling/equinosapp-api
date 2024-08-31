@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_USER: equinosapp
+      POSTGRES_PASSWORD: equinosapp
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  springboot:
+    image: equinosapp-api-springboot
+    container_name: springboot
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_USERNAME: equinosapp
+      SPRING_DATASOURCE_PASSWORD: equinosapp
+    volumes:
+      - ./images:/opt/equinosapp-api/images  # Map the host 'images' directory to the container '/opt/images'
+
+volumes:
+  postgres_data:
