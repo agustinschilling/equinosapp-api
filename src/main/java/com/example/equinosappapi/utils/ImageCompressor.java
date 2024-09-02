@@ -9,14 +9,23 @@ import java.io.IOException;
 
 public class ImageCompressor {
 
+    private static final double COMPRESSION_FACTOR = 0.5;
+
+    private static final int MAX_WIDTH = 500; // px
+
+
+
     public byte[] compressImage(byte[] bytes) throws IOException {
-        long originalSize = bytes.length;
-        System.out.println("Original size = " + originalSize);
+        // long originalSize = bytes.length;
+        // System.out.println("Original size = " + originalSize);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         BufferedImage originalImage = ImageIO.read(inputStream);
 
-        int targetWidth = 100;  // Width
-        int targetHeight = (int) (originalImage.getHeight() * (100.0 / originalImage.getWidth())); // Maintain aspect ratio
+        int targetWidth = MAX_WIDTH;  // Width
+        int targetHeight = (int) (originalImage.getHeight() * ((double) targetWidth / originalImage.getWidth())); // Maintain aspect ratio
+
+        //int targetWidth = (int) (originalImage.getWidth() * COMPRESSION_FACTOR);
+        //int targetHeight = (int) (originalImage.getHeight() * COMPRESSION_FACTOR);
 
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
