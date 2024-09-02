@@ -39,10 +39,6 @@ public class Horse {
     private boolean estabulacion;
     private boolean salidaAPiquete;
     private boolean dolor;
-    @Lob
-    private byte[] image;
-    @Lob
-    @Column(name = "compressed_image")
-    private byte[] compressedImage;
+    private String image;
     private String observations;
 }

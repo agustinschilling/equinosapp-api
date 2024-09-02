@@ -6,6 +6,7 @@ import com.example.equinosappapi.models.PredictionDetail;
 import com.example.equinosappapi.models.PredictionEnum;
 import com.example.equinosappapi.services.AnalysisService;
 import com.example.equinosappapi.services.HorseService;
+import com.example.equinosappapi.services.ImageService;
 import com.example.equinosappapi.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.equinosappapi.services.ImageService.getImageExtension;
+
 @RestController
 @RequestMapping("/api/analysis")
 public class AnalysisController {
@@ -25,12 +28,15 @@ public class AnalysisController {
     private final AnalysisService analysisService;
     private final HorseService horseService;
     private final UserService userService;
+    private final ImageService imageService;
+
 
     @Autowired
-    public AnalysisController(AnalysisService analysisService, HorseService horseService, UserService userService) {
+    public AnalysisController(AnalysisService analysisService, HorseService horseService, UserService userService, ImageService imageService) {
         this.analysisService = analysisService;
         this.horseService = horseService;
         this.userService = userService;
+        this.imageService = imageService;
     }
 
     @Operation(summary = "Subir analisis")
@@ -38,7 +44,13 @@ public class AnalysisController {
     public void uploadAnalysis(@RequestPart("analysis") AnalysisDto analysis, @RequestPart("image") MultipartFile image) throws IOException {
         Analysis newAnalysis = new Analysis();
         setAnalysisData(analysis, newAnalysis);
-        newAnalysis.setImage(image.getBytes());
+
+        if (image != null && !image.isEmpty()) {
+            String originalFileName = image.getOriginalFilename();
+            String extension = getImageExtension(originalFileName);
+            String imageName = imageService.saveImage(image.getBytes(), extension, "analysis");
+            newAnalysis.setImage(imageName);
+        }
         analysisService.add(newAnalysis);
     }
 
@@ -62,14 +74,24 @@ public class AnalysisController {
 
     @Operation(summary = "Modificar analisis")
     @PutMapping("/{id}")
-    public ResponseEntity<Analysis> updateAnalysis(@PathVariable Long id, @RequestPart("analysis") AnalysisDto analysisDetails, @RequestPart("image") MultipartFile image) throws IOException {
+    public ResponseEntity<Analysis> updateAnalysis(@PathVariable Long id, @RequestPart("analysis") AnalysisDto analysisDetails, @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
         Optional<Analysis> optionalAnalysis = analysisService.readOne(id);
         if (optionalAnalysis.isPresent()) {
             Analysis analysis = optionalAnalysis.get();
+            String oldImageName = analysis.getImage();
+
             setAnalysisData(analysisDetails, analysis);
 
             if (image != null && !image.isEmpty()) {
-                analysis.setImage(image.getBytes());
+                String originalFileName = image.getOriginalFilename();
+                String extension = getImageExtension(originalFileName);
+                byte[] bytes = image.getBytes();
+                String imageName = imageService.saveImage(bytes, extension, "analysis");
+                analysis.setImage(imageName);
+
+                if (oldImageName != null) {
+                    imageService.deleteImage(oldImageName);
+                }
             }
 
             analysisService.update(analysis);
@@ -84,6 +106,10 @@ public class AnalysisController {
     public ResponseEntity<Void> deleteAnalysis(@PathVariable Long id) {
         Optional<Analysis> analysis = analysisService.readOne(id);
         if (analysis.isPresent()) {
+            String imageName = analysis.get().getImage();
+            if (imageName != null) {
+                imageService.deleteImage(imageName);
+            }
             analysisService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } else {

@@ -1,7 +1,6 @@
 package com.example.equinosappapi.services;
 
 import com.example.equinosappapi.dtos.HorseDto;
-import com.example.equinosappapi.dtos.HorseWithCompressedImageDto;
 import com.example.equinosappapi.repositories.IHorseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,9 @@ public class HorseService {
         horseRepository.save(horse);
     }
 
-    public List<HorseWithCompressedImageDto> readAll() {
+    public List<HorseDto> readAll() {
         List<Horse> horses = horseRepository.findAll();
-        return horses.stream().map(this::convertToHorseWithCompressedImageDto).collect(Collectors.toList());
+        return horses.stream().map(this::convertToHorseDto).collect(Collectors.toList());
     }
 
     public Optional<Horse> readOne(Long id) {
@@ -46,21 +45,6 @@ public class HorseService {
         return horseRepository.getReferenceById(id);
     }
 
-    private HorseWithCompressedImageDto convertToHorseWithCompressedImageDto(Horse horse) {
-        return new HorseWithCompressedImageDto(
-                horse.getId(),
-                horse.getName(),
-                horse.getSexo().toString(),
-                horse.getDateOfBirth(),
-                horse.isEntrenamiento(),
-                horse.isEstabulacion(),
-                horse.isSalidaAPiquete(),
-                horse.isDolor(),
-                horse.getCompressedImage(),
-                horse.getObservations()
-        );
-    }
-
     private HorseDto convertToHorseDto(Horse horse) {
         return new HorseDto(
                 horse.getId(),
@@ -71,7 +55,7 @@ public class HorseService {
                 horse.isEstabulacion(),
                 horse.isSalidaAPiquete(),
                 horse.isDolor(),
-                horse.getCompressedImage(),
+                horse.getImage(),
                 horse.getObservations()
         );
     }

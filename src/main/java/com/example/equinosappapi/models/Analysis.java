@@ -25,8 +25,7 @@ public class Analysis {
     @JoinColumn(name = "horse_id", referencedColumnName = "horse_id")
     private Horse horse;
 
-    @Lob
-    private byte[] image;
+    private String image;
 
     @Embedded
     @Column(name = "prediction_detail")
