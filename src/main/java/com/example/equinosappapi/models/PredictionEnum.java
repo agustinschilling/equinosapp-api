@@ -5,9 +5,9 @@ public enum PredictionEnum {
 
     public static PredictionEnum fromString(String str) {
         if (str != null) {
-            for (PredictionEnum predition : PredictionEnum.values()) {
-                if (str.equalsIgnoreCase(predition.name())) {
-                    return predition;
+            for (PredictionEnum prediction : PredictionEnum.values()) {
+                if (str.equalsIgnoreCase(prediction.name())) {
+                    return prediction;
                 }
             }
         }
