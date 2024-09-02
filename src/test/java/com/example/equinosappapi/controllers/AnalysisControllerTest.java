@@ -6,6 +6,7 @@ import com.example.equinosappapi.models.Horse;
 import com.example.equinosappapi.models.User;
 import com.example.equinosappapi.services.AnalysisService;
 import com.example.equinosappapi.services.HorseService;
+import com.example.equinosappapi.services.ImageService;
 import com.example.equinosappapi.services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,10 +37,14 @@ class AnalysisControllerTest {
     private UserService userService;
 
     @Mock
+    private ImageService imageService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @InjectMocks
     private AnalysisController analysisController;
+
 
     @BeforeEach
     void setUp() {

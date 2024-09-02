@@ -1,10 +1,9 @@
 package com.example.equinosappapi.controllers;
 
 import com.example.equinosappapi.dtos.HorseDto;
-import com.example.equinosappapi.dtos.HorseWithCompressedImageDto;
 import com.example.equinosappapi.models.Horse;
 import com.example.equinosappapi.services.HorseService;
-import com.example.equinosappapi.utils.ImageCompressor;
+import com.example.equinosappapi.services.ImageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +28,9 @@ class HorseControllerTest {
 
     @InjectMocks
     private HorseController horseController;
+
+    @Mock
+    private ImageService imageService;
 
     @BeforeEach
     void setUp() {
@@ -60,8 +62,6 @@ class HorseControllerTest {
         assertEquals("Caballo 1", addedHorse.getName());
         assertEquals(Horse.Gender.MALE, addedHorse.getSexo());
         assertEquals("2023-01-01", addedHorse.getDateOfBirth());
-        assertArrayEquals(image.getBytes(), addedHorse.getImage());
-        assertNull(addedHorse.getCompressedImage()); // Compressed image is set later in the thread
     }
 
     // @Test
@@ -93,7 +93,7 @@ class HorseControllerTest {
         assertEquals("Updated Name", existingHorse.getName());
         assertEquals(Horse.Gender.FEMALE, existingHorse.getSexo());
         assertEquals("2020-01-01", existingHorse.getDateOfBirth());
-        assertArrayEquals(image.getBytes(), existingHorse.getImage());
+        assertArrayEquals(image.getBytes(), existingHorse.getImage().getBytes());
         verify(horseService).update(existingHorse);
     }
 
@@ -149,8 +149,8 @@ class HorseControllerTest {
     @Test
     void readAll_shouldReturnListOfHorses() {
         // Arrange
-        List<HorseWithCompressedImageDto> horses = List.of(
-                new HorseWithCompressedImageDto(
+        List<HorseDto> horses = List.of(
+                new HorseDto(
                         1L,
                         "Horse 1",
                         "MALE",
@@ -159,10 +159,10 @@ class HorseControllerTest {
                         true,
                         true,
                         false,
-                        new byte[]{},
+                        "",
                         "Observations 1"
                 ),
-                new HorseWithCompressedImageDto(
+                new HorseDto(
                         2L,
                         "Horse 2",
                         "FEMALE",
@@ -171,16 +171,17 @@ class HorseControllerTest {
                         false,
                         false,
                         true,
-                        new byte[]{},
+                        "",
                         "Observations 2"
                 )
         );
         when(horseService.readAll()).thenReturn(horses);
 
         // Act
-        List<HorseWithCompressedImageDto> result = horseController.readAll();
+        List<HorseDto> result = horseController.readAll().getBody();
 
         // Assert
+        assert result != null;
         assertEquals(2, result.size());
         assertEquals("Horse 1", result.get(0).getName());
         assertEquals("Horse 2", result.get(1).getName());
@@ -195,13 +196,16 @@ class HorseControllerTest {
         Long horseId = 1L;
         Horse horse = new Horse();
         horse.setId(horseId);
-        when(horseService.getById(horseId)).thenReturn(horse);
+
+        when(horseService.readOne(horseId)).thenReturn(Optional.of(horse));
 
         // Act
-        Horse result = horseController.getHorseById(horseId).getBody();
+        ResponseEntity<Horse> result = horseController.getHorseById(horseId);
 
         // Assert
-        assertEquals(horseId, result.getId());
-        verify(horseService).getById(horseId);
+        assertNotNull(result);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(horse, result.getBody());
+        verify(horseService).readOne(horseId);
     }
 }
