@@ -1,15 +1,13 @@
 package com.example.equinosappapi.controllers;
 
 import com.example.equinosappapi.dtos.HorseDto;
-import com.example.equinosappapi.dtos.HorseWithCompressedImageDto;
 import com.example.equinosappapi.models.Horse;
 import com.example.equinosappapi.services.HorseService;
-import com.example.equinosappapi.utils.ImageCompressor;
+import com.example.equinosappapi.services.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,15 +15,20 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.equinosappapi.services.ImageService.getImageExtension;
+
 @RestController
 @RequestMapping("/api/horses")
 public class HorseController {
 
     private final HorseService horseService;
 
+    private final ImageService imageService;
+
     @Autowired
-    public HorseController(HorseService horseService) {
+    public HorseController(HorseService horseService, ImageService imageService) {
         this.horseService = horseService;
+        this.imageService = imageService;
     }
 
     @Operation(summary = "Cargar caballo")
@@ -33,25 +36,15 @@ public class HorseController {
     public void loadHorse(@RequestPart("horse") HorseDto horse, @RequestPart("image") MultipartFile image) throws IOException {
         Horse newHorse = new Horse();
         setHorseData(horse, newHorse);
+        String originalFileName = image.getOriginalFilename();
+        String extension = getImageExtension(originalFileName);
         byte[] bytes = image.getBytes();
-        newHorse.setImage(bytes);
-
+        String imageName = imageService.saveImage(bytes, extension, "horses");
+        newHorse.setImage(imageName);
         horseService.add(newHorse);
-
-        Thread thread = new Thread(() -> {
-            ImageCompressor compressor = new ImageCompressor();
-            try {
-                byte[] compressImage = compressor.compressImage(bytes);
-                newHorse.setCompressedImage(compressImage);
-                horseService.update(newHorse);
-                System.out.println("Imagen comprimida y caballo actualizados exitosamente");
-            } catch (IOException e) {
-                System.out.println("Error al comprimir la imagen: " + e.getMessage());
-            }
-        });
-        thread.start();
     }
 
+    // TODO quizas mover logica de upload de imagen al servicio
     @Operation(summary = "Modificar caballo")
     @PutMapping("/{id}")
     public ResponseEntity<Horse> updateHorse(@PathVariable Long id, @RequestPart("horse") HorseDto horseDetails, @RequestPart("image") MultipartFile image) throws IOException {
@@ -59,19 +52,29 @@ public class HorseController {
         if (optionalHorse.isPresent()) {
             Horse horse = optionalHorse.get();
             setHorseData(horseDetails, horse);
+
             if (image != null && !image.isEmpty()) {
-                byte[] bytes = image.getBytes();
-                horse.setImage(bytes);
-                ImageCompressor compressor = new ImageCompressor();
-                byte[] compressImage = compressor.compressImage(bytes);
-                horse.setCompressedImage(compressImage);
+                // Check if the horse already has an image
+                String existingImageName = horse.getImage();
+                if (existingImageName != null && !existingImageName.isEmpty()) {
+                    // Delete the existing image
+                    imageService.deleteImage("horses/" + existingImageName);
+                }
+
+                // Save the new image
+                String originalFileName = image.getOriginalFilename();
+                String extension = ImageService.getImageExtension(originalFileName);
+                String imageName = imageService.saveImage(image.getBytes(), extension, "horses");
+                horse.setImage(imageName);
             }
+
             horseService.update(horse);
             return ResponseEntity.ok(horse);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
 
     private void setHorseData(@RequestPart("horse") HorseDto horseDetails, Horse horse) {
         horse.setName(horseDetails.getName());
@@ -89,6 +92,14 @@ public class HorseController {
     public ResponseEntity<Void> deleteHorse(@PathVariable Long id) {
         Optional<Horse> horse = horseService.readOne(id);
         if (horse.isPresent()) {
+            // Get the associated image name
+            String imageName = horse.get().getImage();
+            if (imageName != null && !imageName.isEmpty()) {
+                // Delete the image from the filesystem
+                imageService.deleteImage("horses/" + imageName);
+            }
+
+            // Delete the horse from the database
             horseService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } else {
@@ -96,10 +107,12 @@ public class HorseController {
         }
     }
 
+
     @Operation(summary = "Obtener caballos")
     @GetMapping
-    public List<HorseWithCompressedImageDto> readAll() {
-        return horseService.readAll();
+    public ResponseEntity<List<HorseDto>> readAll() {
+        List<HorseDto> horses = horseService.readAll();
+        return ResponseEntity.ok(horses);
     }
 
     @Operation(summary = "Obtener caballo por identificación")

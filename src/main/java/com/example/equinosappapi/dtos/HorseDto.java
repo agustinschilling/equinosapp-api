@@ -16,6 +16,6 @@ public class HorseDto {
     private boolean estabulacion;
     private boolean salidaAPiquete;
     private boolean dolor;
-    private byte[] image;
+    private String image;
     private String observations;
 }
