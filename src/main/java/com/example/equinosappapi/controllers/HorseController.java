@@ -44,7 +44,6 @@ public class HorseController {
         horseService.add(newHorse);
     }
 
-    // TODO quizas mover logica de upload de imagen al servicio
     @Operation(summary = "Modificar caballo")
     @PutMapping("/{id}")
     public ResponseEntity<Horse> updateHorse(@PathVariable Long id, @RequestPart("horse") HorseDto horseDetails, @RequestPart("image") MultipartFile image) throws IOException {

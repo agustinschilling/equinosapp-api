@@ -9,5 +9,4 @@ public class EquinosappApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(EquinosappApiApplication.class, args);
     }
-
 }
