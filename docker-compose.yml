@@ -24,8 +24,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
       SPRING_DATASOURCE_USERNAME: equinosapp
       SPRING_DATASOURCE_PASSWORD: equinosapp
+      image.base-directory: /opt/equinosapp-api/images
     volumes:
-      - ./images:/opt/equinosapp-api/images  # Map the host 'images' directory to the container '/opt/images'
+      - ./images:/opt/equinosapp-api/images
 
 volumes:
   postgres_data:
