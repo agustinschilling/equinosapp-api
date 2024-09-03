@@ -46,7 +46,7 @@ public class HorseController {
 
     @Operation(summary = "Modificar caballo")
     @PutMapping("/{id}")
-    public ResponseEntity<Horse> updateHorse(@PathVariable Long id, @RequestPart("horse") HorseDto horseDetails, @RequestPart("image") MultipartFile image) throws IOException {
+    public ResponseEntity<Horse> updateHorse(@PathVariable Long id, @RequestPart("horse") HorseDto horseDetails, @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
         Optional<Horse> optionalHorse = horseService.readOne(id);
         if (optionalHorse.isPresent()) {
             Horse horse = optionalHorse.get();
