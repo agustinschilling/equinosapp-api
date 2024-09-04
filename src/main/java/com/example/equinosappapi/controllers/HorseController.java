@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +63,7 @@ public class HorseController {
                 String existingImageName = horse.getImage();
                 if (existingImageName != null && !existingImageName.isEmpty()) {
                     // Delete the existing image
-                    imageService.deleteImage("horses/" + existingImageName);
+                    imageService.deleteImage("horses" + File.separator + existingImageName);
                 }
 
                 // Save the new image
@@ -96,7 +97,7 @@ public class HorseController {
     public ResponseEntity<String> deleteHorse(@PathVariable Long id) {
         Optional<Horse> horse = horseService.readOne(id);
         if (horse.isPresent()) {
-            // Verificar si el caballo está referenciado en Analysis
+            // Check if the horse is referenced in Analysis
             List<Analysis> analysesReferencingHorse = analysisService.getByHorseId(id);
             if (!analysesReferencingHorse.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -107,7 +108,7 @@ public class HorseController {
             String imageName = horse.get().getImage();
             if (imageName != null && !imageName.isEmpty()) {
                 // Delete the image from the filesystem
-                imageService.deleteImage("horses/" + imageName);
+                imageService.deleteImage("horses" + File.separator + imageName);
             }
 
             // Delete the horse from the database

@@ -2,6 +2,7 @@ package com.example.equinosappapi.services;
 
 import com.example.equinosappapi.models.User;
 import com.example.equinosappapi.repositories.IUserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,5 +40,13 @@ public class UserService {
 
     public User getByUsername(String username) {
         return userRepository.getByUsername(username);
+    }
+
+    public static String extractTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }

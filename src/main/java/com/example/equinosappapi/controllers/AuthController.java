@@ -131,7 +131,7 @@ public class AuthController {
     @Operation(summary = "Cerrar sesión")
     @PostMapping("logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
-        String token = extractTokenFromRequest(request);
+        String token = UserService.extractTokenFromRequest(request);
         // TODO: Implementar la lógica de cierre de sesión
         return new ResponseEntity<>("Sesión cerrada con éxito", HttpStatus.OK);
     }
@@ -151,7 +151,7 @@ public class AuthController {
     @Operation(summary = "Renovar token")
     @PostMapping("renew-token")
     public ResponseEntity<AuthResponseDto> renewToken(HttpServletRequest request) {
-        String token = extractTokenFromRequest(request);
+        String token = UserService.extractTokenFromRequest(request);
         if (token != null && jwtGenerator.validateToken(token)) {
             Authentication authentication = jwtGenerator.getAuthentication(token);
             String newToken = jwtGenerator.generateToken(authentication);
@@ -172,13 +172,6 @@ public class AuthController {
         }
     }
 
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
 
     private Authentication authenticateUser(String username, String password) {
         return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));

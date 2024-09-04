@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -90,7 +91,7 @@ public class AnalysisController {
                 analysis.setImage(imageName);
 
                 if (oldImageName != null) {
-                    imageService.deleteImage(oldImageName);
+                    imageService.deleteImage("analysis" + File.separator + oldImageName);
                 }
             }
 
@@ -108,7 +109,7 @@ public class AnalysisController {
         if (analysis.isPresent()) {
             String imageName = analysis.get().getImage();
             if (imageName != null) {
-                imageService.deleteImage("analysis/" + imageName);
+                imageService.deleteImage("analysis" + File.separator + imageName);
             }
             analysisService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
