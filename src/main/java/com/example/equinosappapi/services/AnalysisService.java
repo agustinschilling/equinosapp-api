@@ -44,4 +44,8 @@ public class AnalysisService {
     public List<Analysis> getAll() {
         return analysisRepository.findAll();
     }
+
+    public List<Analysis> getByHorseId(Long horseId) {
+        return analysisRepository.findByHorseId(horseId);
+    }
 }

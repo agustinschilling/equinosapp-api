@@ -1,7 +1,9 @@
 package com.example.equinosappapi.controllers;
 
 import com.example.equinosappapi.dtos.HorseDto;
+import com.example.equinosappapi.models.Analysis;
 import com.example.equinosappapi.models.Horse;
+import com.example.equinosappapi.services.AnalysisService;
 import com.example.equinosappapi.services.HorseService;
 import com.example.equinosappapi.services.ImageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,10 +27,13 @@ public class HorseController {
 
     private final ImageService imageService;
 
+    private final AnalysisService analysisService;
+
     @Autowired
-    public HorseController(HorseService horseService, ImageService imageService) {
+    public HorseController(HorseService horseService, ImageService imageService, AnalysisService analysisService) {
         this.horseService = horseService;
         this.imageService = imageService;
+        this.analysisService = analysisService;
     }
 
     @Operation(summary = "Cargar caballo")
@@ -88,9 +93,16 @@ public class HorseController {
 
     @Operation(summary = "Eliminar caballo")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHorse(@PathVariable Long id) {
+    public ResponseEntity<String> deleteHorse(@PathVariable Long id) {
         Optional<Horse> horse = horseService.readOne(id);
         if (horse.isPresent()) {
+            // Verificar si el caballo está referenciado en Analysis
+            List<Analysis> analysesReferencingHorse = analysisService.getByHorseId(id);
+            if (!analysesReferencingHorse.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("El caballo no se puede eliminar porque está siendo referenciado en uno o más análisis.");
+            }
+
             // Get the associated image name
             String imageName = horse.get().getImage();
             if (imageName != null && !imageName.isEmpty()) {

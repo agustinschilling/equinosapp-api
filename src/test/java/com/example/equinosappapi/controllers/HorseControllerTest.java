@@ -124,7 +124,7 @@ class HorseControllerTest {
         when(horseService.readOne(horseId)).thenReturn(Optional.of(existingHorse));
 
         // Act
-        ResponseEntity<Void> response = horseController.deleteHorse(horseId);
+        ResponseEntity<String> response = horseController.deleteHorse(horseId);
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -139,7 +139,7 @@ class HorseControllerTest {
         when(horseService.readOne(horseId)).thenReturn(Optional.empty());
 
         // Act
-        ResponseEntity<Void> response = horseController.deleteHorse(horseId);
+        ResponseEntity<String> response = horseController.deleteHorse(horseId);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
