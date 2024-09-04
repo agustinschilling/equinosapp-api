@@ -108,7 +108,7 @@ public class AnalysisController {
         if (analysis.isPresent()) {
             String imageName = analysis.get().getImage();
             if (imageName != null) {
-                imageService.deleteImage(imageName);
+                imageService.deleteImage("analysis/" + imageName);
             }
             analysisService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
