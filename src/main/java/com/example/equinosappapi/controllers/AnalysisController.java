@@ -1,14 +1,14 @@
 package com.example.equinosappapi.controllers;
 
 import com.example.equinosappapi.dtos.AnalysisDto;
-import com.example.equinosappapi.models.Analysis;
-import com.example.equinosappapi.models.PredictionDetail;
-import com.example.equinosappapi.models.PredictionEnum;
+import com.example.equinosappapi.dtos.ObservationDto;
+import com.example.equinosappapi.models.*;
 import com.example.equinosappapi.services.AnalysisService;
 import com.example.equinosappapi.services.HorseService;
 import com.example.equinosappapi.services.ImageService;
 import com.example.equinosappapi.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static com.example.equinosappapi.security.JwtGenerator.getUsernameFromJwt;
 import static com.example.equinosappapi.services.ImageService.getImageExtension;
 
 @RestController
@@ -126,5 +126,26 @@ public class AnalysisController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.ok(analyses);
+    }
+
+    @PostMapping("/observation")
+    public ResponseEntity<Void> addObservation(@RequestBody ObservationDto observation, HttpServletRequest request) {
+        Analysis analysis = analysisService.getById(observation.getAnalysisId());
+        if (analysis == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String token = UserService.extractTokenFromRequest(request);
+        String username = getUsernameFromJwt(token);
+        User user = userService.getByUsername(username);
+
+        AnalysisObservation analysisObservation = new AnalysisObservation();
+        analysisObservation.setObservation(observation.getObservation());
+        analysisObservation.setUser(user);
+        analysisObservation.setPrediction(observation.getPredictionEnum());
+        analysisObservation.setAnalysis(analysis);
+        analysis.addAnalysisObservation(analysisObservation);
+        analysisService.update(analysis);
+        return ResponseEntity.ok().build();
     }
 }

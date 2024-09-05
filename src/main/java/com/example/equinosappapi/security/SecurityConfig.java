@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/horses/**").hasRole("ADVANCED_USER")
                         .requestMatchers(HttpMethod.PUT, "/api/analysis/**").hasRole("ADVANCED_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/analysis/observation").hasRole("ADVANCED_USER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
