@@ -1,5 +1,6 @@
 package com.example.equinosappapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class User {
     private Long userId;
     private String username;
     private String email;
+    @JsonIgnore
     private String password;
     private String image;
 
