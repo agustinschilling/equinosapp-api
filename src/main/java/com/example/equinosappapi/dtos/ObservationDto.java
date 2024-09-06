@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ObservationDto {
     private Long analysisId;
-    private Long userId;
     private String observation;
     private PredictionEnum predictionEnum;
 }
