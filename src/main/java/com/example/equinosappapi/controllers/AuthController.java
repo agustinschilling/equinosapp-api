@@ -119,6 +119,7 @@ public class AuthController {
             authResponse.setEmail(user.getEmail());
             authResponse.setRole(user.getRole());
             authResponse.setUserId(user.getUserId());
+            authResponse.setImage(user.getImage());
 
             return ResponseEntity.ok(authResponse);
         } catch (UsernameNotFoundException e) {
