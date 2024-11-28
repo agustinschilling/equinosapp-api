@@ -150,7 +150,7 @@ public class AuthController {
     }
 
     @Operation(summary = "Renovar token")
-    @PostMapping("renew-token")
+    @GetMapping("renew-token")
     public ResponseEntity<AuthResponseDto> renewToken(HttpServletRequest request) {
         String token = UserService.extractTokenFromRequest(request);
         if (token != null && jwtGenerator.validateToken(token)) {

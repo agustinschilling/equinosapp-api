@@ -80,7 +80,6 @@ public class HorseController {
         }
     }
 
-
     private void setHorseData(@RequestPart("horse") HorseDto horseDetails, Horse horse) {
         horse.setName(horseDetails.getName());
         horse.setSexo(Horse.Gender.fromString(horseDetails.getGender()));
