@@ -21,6 +21,8 @@ public class ImageService {
 
     public ImageService(@Value("${image.base-directory}") String baseDirectory) {
         this.BASE_DIRECTORY = baseDirectory;
+        System.out.println("Ruta absoluta del directorio base: " + Paths.get(BASE_DIRECTORY).toAbsolutePath());
+
         // Create the base directory if it doesn't exist
         createDirectoryIfNotExists(Paths.get(BASE_DIRECTORY));
         createDirectoryIfNotExists(Paths.get(BASE_DIRECTORY, "users"));
